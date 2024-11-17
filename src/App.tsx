@@ -4,14 +4,24 @@ import { Carousel } from "./components/Carousel";
 import { Slide } from "./components/Slide";
 
 import { SLIDES } from "./utils/constants";
-import { useCarouselNavigation } from "./hooks/useCarouselNavigation";
 
-const PER_PAGE = 4;
+import { useCarouselNavigation } from "./hooks/useCarouselNavigation";
+import { useBreakpointsCarousel } from "./hooks/useBreakpointsCarousel";
+
 const GAP = 16;
-const COLLAPSED_WIDTH = `calc((100% * 2 / 3 - 3 * ${GAP}px) / ${PER_PAGE - 1})`;
-const EXPANDED_WIDTH = `calc((100% - 3 * ${GAP}px) / ${PER_PAGE})`;
+const BREAKPOINTS: {
+  [key: number]: number;
+} = {
+  640: 1,
+  768: 2,
+  1024: 3,
+  1280: 4,
+  1536: 5,
+};
 
 function App() {
+  const { perPage, elementRef } = useBreakpointsCarousel(BREAKPOINTS);
+
   const [activeSlide, setActiveSlide] = useState<null | number>(null);
 
   const {
@@ -21,10 +31,9 @@ function App() {
     handleNext,
     handlePrev,
   } = useCarouselNavigation({
-    perPage: PER_PAGE,
+    perPage: perPage,
     slidesCount: SLIDES.length,
   });
-
   return (
     <>
       <div className="p-6">
@@ -36,11 +45,12 @@ function App() {
         </button>
 
         <div
+          ref={elementRef}
           className="mx-auto h-96 max-w-7xl overflow-hidden"
           onMouseLeave={() => setActiveSlide(null)}
         >
           <Carousel
-            perPage={PER_PAGE}
+            perPage={perPage}
             gap={GAP}
             slides={SLIDES}
             currentSlideIndex={currentSlideIndex}
@@ -50,10 +60,10 @@ function App() {
                 key={slide.id}
                 {...slide}
                 activeSlide={activeSlide}
-                collapsedWidth={COLLAPSED_WIDTH}
-                expandedWidth={EXPANDED_WIDTH}
                 isActive={activeSlide === index}
                 isVisible={isVisible}
+                gap={GAP}
+                perPage={perPage}
                 onMouseOver={() => setActiveSlide(index)}
               />
             )}

@@ -2,22 +2,22 @@ import { motion } from "framer-motion";
 
 type Props = {
   activeSlide: number | null;
-  collapsedWidth: string;
   description: string;
-  expandedWidth: string;
   id: number;
   isActive: boolean;
   isVisible: boolean;
   src: string;
   title: string;
+  gap: number;
+  perPage: number;
   onMouseOver: () => void;
 };
 
 export function Slide({
   activeSlide,
-  collapsedWidth,
+  perPage,
   description,
-  expandedWidth,
+  gap,
   id,
   isActive,
   isVisible,
@@ -26,6 +26,9 @@ export function Slide({
   onMouseOver,
 }: Props) {
   const isActiveVisible = activeSlide !== null && isVisible;
+
+  const collapsedWidth = `calc((100% * 2 / 3 - 3 * ${gap}px) / ${perPage - 1})`;
+  const expandedWidth = `calc((100% - 3 * ${gap}px) / ${perPage})`;
 
   return (
     <>
