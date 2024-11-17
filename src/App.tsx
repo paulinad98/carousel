@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import { motion } from "framer-motion";
-
+import { Carousel } from "./components/Carousel";
 import { Slide } from "./components/Slide";
 
 import { SLIDES } from "./utils/constants";
+import { useCarouselNavigation } from "./hooks/useCarouselNavigation";
 
 const PER_PAGE = 4;
 const GAP = 16;
@@ -13,55 +13,51 @@ const EXPANDED_WIDTH = `calc((100% - 3 * ${GAP}px) / ${PER_PAGE})`;
 
 function App() {
   const [activeSlide, setActiveSlide] = useState<null | number>(null);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const isNextDisabled = currentIndex + PER_PAGE >= SLIDES.length;
-  const isPrevDisabled = currentIndex === 0;
-
-  function handleNext() {
-    if (isNextDisabled) return;
-
-    setCurrentIndex(currentIndex + 1);
-  }
-
-  function handlePrev() {
-    if (isPrevDisabled) return;
-
-    setCurrentIndex(currentIndex - 1);
-  }
-
-  function isVisible(index: number) {
-    return index >= currentIndex && index < currentIndex + PER_PAGE;
-  }
+  const {
+    currentSlideIndex,
+    isNextDisabled,
+    isPrevDisabled,
+    handleNext,
+    handlePrev,
+  } = useCarouselNavigation({
+    perPage: PER_PAGE,
+    slidesCount: SLIDES.length,
+  });
 
   return (
     <>
       <div className="p-6">
-        <button onClick={handlePrev}>prev</button>
-        <button onClick={handleNext}>next</button>
+        <button onClick={handlePrev} disabled={isPrevDisabled}>
+          prev
+        </button>
+        <button onClick={handleNext} disabled={isNextDisabled}>
+          next
+        </button>
 
-        <div className="mx-auto h-96 max-w-7xl overflow-hidden">
-          <motion.div
-            className="flex h-full w-full"
-            onMouseLeave={() => setActiveSlide(null)}
-            style={{
-              transform: `translateX(calc(-${currentIndex} * ((100% + 16px) / ${PER_PAGE}))`,
-              gap: GAP,
-            }}
+        <div
+          className="mx-auto h-96 max-w-7xl overflow-hidden"
+          onMouseLeave={() => setActiveSlide(null)}
+        >
+          <Carousel
+            perPage={PER_PAGE}
+            gap={GAP}
+            slides={SLIDES}
+            currentSlideIndex={currentSlideIndex}
           >
-            {SLIDES.map((slide, index) => (
+            {({ slide, index, isVisible }) => (
               <Slide
                 key={slide.id}
                 {...slide}
-                onMouseOver={() => setActiveSlide(index)}
-                expandedWidth={EXPANDED_WIDTH}
-                collapsedWidth={COLLAPSED_WIDTH}
                 activeSlide={activeSlide}
-                isVisible={isVisible(index)}
+                collapsedWidth={COLLAPSED_WIDTH}
+                expandedWidth={EXPANDED_WIDTH}
                 isActive={activeSlide === index}
+                isVisible={isVisible}
+                onMouseOver={() => setActiveSlide(index)}
               />
-            ))}
-          </motion.div>
+            )}
+          </Carousel>
         </div>
       </div>
     </>
